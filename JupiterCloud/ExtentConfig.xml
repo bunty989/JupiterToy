@@ -14,7 +14,7 @@
     <protocol>https</protocol>
 
     <!-- title of the document -->
-    <documentTitle>TAL Claims Enterprise Automation Framework</documentTitle>
+    <documentTitle>Soumil's BDD Automation Framework</documentTitle>
 
     <!-- report name - displayed at top-nav -->
     <reportName>Automation Test Report</reportName>

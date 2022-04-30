@@ -70,7 +70,7 @@ namespace JupiterCloud.Framework.Drivers
                     };
                     ffOptions.SetPreference("permissions.default.image", 2);
                     ffOptions.PageLoadStrategy = PageLoadStrategy.Eager;
-                    new DriverManager().SetUpDriver(new FirefoxConfig(), _browserVersion);
+                    new DriverManager().SetUpDriver(new FirefoxConfig());
                     Driver = new FirefoxDriver(ffOptions);
                     break;
                 }

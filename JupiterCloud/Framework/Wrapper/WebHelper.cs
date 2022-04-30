@@ -367,6 +367,36 @@ namespace JupiterCloud.Framework.Wrapper
             return visibleText;
         }
 
+        public string? ReturnWebAttribute(IWebElement element, string webAttribute)
+        {
+            string? attributeValue;
+            try
+            {
+                attributeValue = element.GetAttribute(webAttribute);
+            }
+            catch (Exception)
+            {
+                attributeValue = InitialiseDynamicWebElement(_locator, _locatorInfo)?.GetAttribute(webAttribute);
+            }
+            Log.Debug("The attribute {0} for the webElement is {1}", webAttribute, attributeValue);
+            return attributeValue;
+        }
+
+        public string? ReturnCssAttribute(IWebElement element, string cssAttribute)
+        {
+            string? attributeValue;
+            try
+            {
+                attributeValue = element.GetCssValue(cssAttribute);
+            }
+            catch (Exception)
+            {
+                attributeValue = InitialiseDynamicWebElement(_locator, _locatorInfo)?.GetAttribute(cssAttribute);
+            }
+            Log.Debug("The attribute {0} for the webElement is {1}", cssAttribute,attributeValue);
+            return attributeValue;
+        }
+
         public void GetPageReady()
         {
             try
@@ -413,6 +443,26 @@ namespace JupiterCloud.Framework.Wrapper
             GetPageReady();
             Log.Debug("The Title of the webpage is fetched as {0}", Driver?.Title);
             return Driver?.Title;
+        }
+
+        public IWebElement? FindWebElementFromDomUsingCssSelector(string cssSelector)
+        {
+            GetPageReady();
+            try
+            {
+                var jScript = "return document.querySelector(\"" + cssSelector + "\")";
+                var webElementFound = Driver.ExecuteJavaScript<IWebElement>(jScript);
+                Log.Debug(
+                    webElementFound != null
+                        ? "The WebElement with CssSelector {0} is found on the DOM"
+                        : "The WebElement with CssSelector {0} is not found on the DOM", cssSelector);
+                return webElementFound;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("The WebElement with CssSelector as {0} cant be found due to {1}", cssSelector, ex.Message);
+                return null;
+            }
         }
 
         public string ReturnHiddenWebElementsValue(string identifierJScript)
