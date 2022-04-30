@@ -1,0 +1,4 @@
+/.vs/*
+/JupiterCloud/obj/*
+/JupiterCloud/bin/*
+/JupiterCloud/Logs*
