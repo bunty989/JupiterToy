@@ -17,10 +17,6 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
-    - name: restore-nuget-packages
-      uses: IT-Service/restore-nuget-packages@v1
-      with:
-        nuget-version: latest
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
@@ -29,4 +25,11 @@ jobs:
       uses: browser-actions/setup-chrome@v0.0.0
     - run: chrome --version
     - name: Test
-      run: dotnet test --no-build --verbosity normal      
+      run: dotnet test --no-build --verbosity normal
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.0
+      if: always()
+      with:
+        path: |
+              JupiterCloud/Logs*
+        if-no-files-found: warn
