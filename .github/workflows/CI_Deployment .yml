@@ -17,6 +17,10 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
+    - name: restore-nuget-packages
+      uses: IT-Service/restore-nuget-packages@v1
+      with:
+        nuget-version: latest
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
