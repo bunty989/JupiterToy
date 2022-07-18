@@ -24,7 +24,7 @@ jobs:
       with:
         tokenPrefix: '{'
         tokenSuffix: '}'
-        files: '["JupiterCloud/bin/Debug/net6.0/appsettings.json"]'
+        files: '["**\JupiterToy\JupiterCloud\bin\Debug\net6.0\appsettings.json"]'
       env:
         browser: "ChromeHeadless"
     - name: Build
