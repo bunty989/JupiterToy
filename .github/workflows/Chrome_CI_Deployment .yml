@@ -1,4 +1,4 @@
-name: Chrome Automated Build
+name: .Net
 
 on:
   push:
