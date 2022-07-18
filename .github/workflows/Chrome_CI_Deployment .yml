@@ -22,9 +22,11 @@ jobs:
     - name: Replace tokens
       uses: cschleiden/replace-tokens@v1
       with:
+        tokenPrefix: '{'
+        tokenSuffix: '}'
         files: '["**/appsettings.json"]'
       env:
-        browser: ChromeHeadless
+        browser: "ChromeHeadless"
     - name: Build
       run: dotnet build --no-restore
     - name: Setup Chrome
