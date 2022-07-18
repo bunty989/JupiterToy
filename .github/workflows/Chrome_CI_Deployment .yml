@@ -1,4 +1,4 @@
-name: .Net
+name: Chrome Automated Build with .Net Core
 
 on:
   push:
@@ -20,7 +20,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Replace tokens
-    - uses: cschleiden/replace-tokens@v1
+      uses: cschleiden/replace-tokens@v1
       with:
         files: '["**/appsettings.json"]'
       env:
