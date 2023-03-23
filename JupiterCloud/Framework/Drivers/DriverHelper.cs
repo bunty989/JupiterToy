@@ -88,7 +88,7 @@ namespace JupiterCloud.Framework.Drivers
                 case Browser.ChromeHeadless:
                 {
                     var chromeOption = new ChromeOptions();
-                    chromeOption.AddArguments("disable-gpu", "no-sandbox", "window-size=1280,800", "headless");
+                    chromeOption.AddArguments("disable-gpu", "no-sandbox", "window-size=1280,800", "--headless=new");
                     chromeOption.AddExcludedArgument("enable-automation");
                     chromeOption.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOption.AddUserProfilePreference("profile.password_manager_enabled", false);
