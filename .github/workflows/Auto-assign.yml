@@ -16,3 +16,4 @@ jobs:
           assignees: ${{github.actor}}
           numOfAssignee: 1
           allowSelfAssign: true
+          removePreviousAssignees: true
