@@ -67,16 +67,18 @@ namespace JupiterCloud.JupiterToys.PageObject
 
         public void GenerateMandatoryFieldsError()
         {
-            _webHelper.ReturnCssAttribute(LabelFeedback, "color");
+            var noError = _webHelper.ReturnCssAttribute(LabelFeedback, "color");
             _webHelper.PerformWebDriverAction(BtnSubmit, WebDriverAction.Click);
             bool error;
+            var count = 0;
             do
             {
                 _webHelper.PerformWebDriverAction(TxtBoxForeName,WebDriverAction.Click);
                 _webHelper.PerformWebDriverAction(TxtBoxEmail,WebDriverAction.Click);
                 _webHelper.PerformWebDriverAction(BtnSubmit, WebDriverAction.Click);
-                error = _webHelper.ReturnCssAttribute(LabelFeedback, "color")!.Equals("rgba(185, 74, 72, 1)");
-            } while (!error);
+                error = _webHelper.ReturnCssAttribute(LabelFeedback, "color") != noError;
+                count++;
+            } while (!error && count<30);
         }
 
         public string? GetForeNameError() => _webHelper.ReturnVisibleText(LabelForeNameError);

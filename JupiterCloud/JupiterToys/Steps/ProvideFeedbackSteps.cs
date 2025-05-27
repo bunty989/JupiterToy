@@ -58,36 +58,36 @@ namespace JupiterCloud.JupiterToys.Steps
         [Then(@"the user should see the error message for ForeName")]
         public void ThenTheUserShouldSeeTheErrorMessageForForeName()
         {
-            Assert.True(!string.IsNullOrEmpty(_contactPage.GetForeNameError()));
+            Assert.That(!string.IsNullOrEmpty(_contactPage.GetForeNameError()));
         }
 
         [Then(@"the user should see the error message for Email")]
         public void ThenTheUserShouldSeeTheErrorMessageForEmail() => 
-            Assert.True(!string.IsNullOrEmpty(_contactPage.GetEmailError()));
+            Assert.That(!string.IsNullOrEmpty(_contactPage.GetEmailError()));
 
         [Then(@"the user should see the error message for Message")]
         public void ThenTheUserShouldSeeTheErrorMessageForMessage() => 
-            Assert.True(!string.IsNullOrEmpty(_contactPage.GetMessageError()));
+            Assert.That(!string.IsNullOrEmpty(_contactPage.GetMessageError()));
 
         [Then(@"the user should not see the error message for ForeName")]
         public void ThenTheUserShouldNotSeeTheErrorMessageForForeName() => 
-            Assert.True(string.IsNullOrEmpty(_contactPage.GetForeNameError()));
+            Assert.That(string.IsNullOrEmpty(_contactPage.GetForeNameError()));
 
         [Then(@"the user should not see the error message for Email")]
         public void ThenTheUserShouldNotSeeTheErrorMessageForEmail() => 
-            Assert.True(string.IsNullOrEmpty(_contactPage.GetEmailError()));
+            Assert.That(string.IsNullOrEmpty(_contactPage.GetEmailError()));
 
         [Then(@"the user should not see the error message for Message")]
         public void ThenTheUserShouldNotSeeTheErrorMessageForMessage() => 
-            Assert.True(string.IsNullOrEmpty(_contactPage.GetMessageError()));
+            Assert.That(string.IsNullOrEmpty(_contactPage.GetMessageError()));
 
         [Then(@"the user should see the feedback submission in progress")]
         public void ThenTheUserShouldSeeTheFeedbackSubmissionInProgress() => 
-            Assert.True(_contactPage.FeedbackSubmissionProgress());
+            Assert.That(_contactPage.FeedbackSubmissionProgress(), Is.True);
 
         [Then(@"the feedback should be successfully submitted")]
         public void ThenTheFeedbackShouldBeSuccessfullySubmitted() =>
-            Assert.AreEqual("Thanks "+_foreName+", we appreciate your feedback.", 
-                _contactPage.FeedbackSubmissionSuccessMessage());
+            Assert.That(_contactPage.FeedbackSubmissionSuccessMessage(), 
+                Is.EqualTo("Thanks " + _foreName + ", we appreciate your feedback."));
     }
 }

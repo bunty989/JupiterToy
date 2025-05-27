@@ -1,7 +1,7 @@
-﻿using NUnit.Framework;
-using TechTalk.SpecFlow;
-using JupiterCloud.Framework.Drivers;
+﻿using JupiterCloud.Framework.Drivers;
 using JupiterCloud.JupiterToys.PageObject;
+using NUnit.Framework;
+using TechTalk.SpecFlow;
 
 namespace JupiterCloud.JupiterToys.Steps
 {
@@ -49,40 +49,40 @@ namespace JupiterCloud.JupiterToys.Steps
         public void WhenGoesToTheShoppingCart() => _homePage.ClickCartButton();
 
         [Then(@"see the total number of item as '(.*)'")]
-        public void ThenSeeTheTotalNumberOfItemAs(int itemCount) => 
-            Assert.AreEqual(itemCount,_shoppingCartPage.GetNumberOfItemsOnCart());
+        public void ThenSeeTheTotalNumberOfItemAs(int itemCount) =>
+            Assert.That(_shoppingCartPage.GetNumberOfItemsOnCart(), Is.EqualTo(itemCount));
 
         [Then(@"verify the count of '(.*)' as '(.*)'")]
         public void ThenVerifyTheCountOfAs(string itemName, int itemCount)
         {
             var item = GetItemNumber(itemName);
-            Assert.AreEqual(itemCount,_shoppingCartPage.GetQuantityOfItem(item));
+            Assert.That(_shoppingCartPage.GetQuantityOfItem(item), Is.EqualTo(itemCount));
         }
 
         [Then(@"the user verifies the subtotal of '(.*)' as '(.*)'")]
         public void ThenTheUserVerifiesTheSubtotalOf(string itemName, string subtotal)
         {
             var item = GetItemNumber(itemName);
-            Assert.AreEqual(subtotal, _shoppingCartPage.GetSubTotals(item));
+            Assert.That(_shoppingCartPage.GetSubTotals(item), Is.EqualTo(subtotal));
         }
 
         [Then(@"the user verifies the price of '(.*)' as '(.*)'")]
         public void ThenTheUserVerifiesThePriceOfAs(string itemName, string price)
         {
             var item = GetItemNumber(itemName);
-            Assert.AreEqual(price, _shoppingCartPage.GetIndividualPrice(item));
+            Assert.That(_shoppingCartPage.GetIndividualPrice(item), Is.EqualTo(price));
         }
 
         [Then(@"the user verifies the sumtotal of all items is calculated correctly")]
         public void ThenTheUserVerifiesTheSumtotalOfAllItemsIsCalculatedCorrectly()
         {
-            Assert.IsTrue(_shoppingCartPage.GetSubTotalAll() == _shoppingCartPage.GetTotal());
+            Assert.That(_shoppingCartPage.GetSubTotalAll() == _shoppingCartPage.GetTotal());
         }
 
         [Then(@"the value of total displayed is '(.*)'")]
         public void ThenTheValueOfTotalDisplayedIs(string totalValue)
         {
-            Assert.AreEqual(totalValue,_shoppingCartPage.GetTotal());
+            Assert.That(_shoppingCartPage.GetTotal(), Is.EqualTo(totalValue));
         }
 
         private static int GetItemNumber(string itemName)
