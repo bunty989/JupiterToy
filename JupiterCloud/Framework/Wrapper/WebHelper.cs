@@ -37,7 +37,6 @@ namespace JupiterCloud.Framework.Wrapper
                     ConfigKey.ObjectIdentificationTimeOut))));
             dWait.IgnoreExceptionTypes(typeof(StaleElementReferenceException),
                 typeof(NoSuchElementException),
-                typeof(ElementNotVisibleException),
                 typeof(ElementNotInteractableException));
             try
             {
@@ -151,7 +150,7 @@ namespace JupiterCloud.Framework.Wrapper
             if (objWebElement == null)
             {
                 Log.Error("{0} Web Element is not identified so no action is performed", _elementDisplayedText);
-                Assert.Fail("{0} Web Element is not identified so no action is performed", _elementDisplayedText);
+                Assert.Fail($"{_elementDisplayedText} Web Element is not identified so no action is performed");
             }
             bool boolExecStep;
             var actFocus = new Actions(Driver);
@@ -304,8 +303,7 @@ namespace JupiterCloud.Framework.Wrapper
                         Log.Error("Unable to perform Action on WebElement {0} due to {1}",
                             _elementDisplayedText,
                             strException);
-                        Assert.Fail("Unable to perform Action on WebElement {0} due to {1}", _elementDisplayedText,
-                            strException);
+                        Assert.Fail($"Unable to perform Action on WebElement {_elementDisplayedText} due to {strException}");
                         break;
                     }
                 }

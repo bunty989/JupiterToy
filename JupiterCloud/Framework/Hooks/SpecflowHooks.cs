@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using AventStack.ExtentReports;
 using AventStack.ExtentReports.Gherkin.Model;
+using AventStack.ExtentReports.Model;
 using AventStack.ExtentReports.Reporter;
 using JupiterCloud.Framework.Drivers;
 using JupiterCloud.Framework.Wrapper;
@@ -12,6 +13,7 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using TechTalk.SpecFlow;
+using Log = Serilog.Log;
 
 namespace JupiterCloud.Framework.Hooks
 {
@@ -84,8 +86,8 @@ namespace JupiterCloud.Framework.Hooks
                 .WriteTo.File(reportFilePath + TestConstant.PathVariables.LogName,
                     outputTemplate: "{Timestamp: yyyy-MM-dd HH:mm:ss.fff} | {Level:u3} | {Message} | {NewLine}",
                     rollingInterval: RollingInterval.Day).CreateLogger();
-            ExtentHtmlReporter htmlReport = new(reportFilePath + "\\");
-            htmlReport.LoadConfig(TestConstant.PathVariables.ReportPath + Path.DirectorySeparatorChar
+            ExtentSparkReporter htmlReport = new(reportFilePath + Path.DirectorySeparatorChar + "ExtentReport.html");
+            htmlReport.LoadXMLConfig(TestConstant.PathVariables.ReportPath + Path.DirectorySeparatorChar
                                                                         + TestConstant.PathVariables.ExtentConfigName);
             _extent = new ExtentReports();
             Dictionary<string, string?> sysInfo = new()
@@ -157,7 +159,7 @@ namespace JupiterCloud.Framework.Hooks
                     }
                     else
                     {
-                        var mediaEntity = AttachScreenShot(context.ScenarioInfo.Title);
+                        var mediaEntity = AttachScreenShot(null);
                         switch (stepType.ToUpper().Trim())
                         {
                             case "GIVEN":
@@ -233,7 +235,7 @@ namespace JupiterCloud.Framework.Hooks
             Log.CloseAndFlush();
         }
 
-        private static MediaEntityModelProvider AttachScreenShot(string name)
+        private static Media AttachScreenShot(string name)
         {
             var base64 = TakesScreenShot();
             return MediaEntityBuilder.CreateScreenCaptureFromBase64String(base64,name).Build();
@@ -290,7 +292,7 @@ namespace JupiterCloud.Framework.Hooks
             }
             else
             {
-                var mediaEntity = AttachScreenShot(context.ScenarioInfo.Title);
+                var mediaEntity = AttachScreenShot(null);
                 switch (stepType.ToUpper().Trim())
                 {
                     case "GIVEN":

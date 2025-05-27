@@ -9,14 +9,14 @@ on:
 jobs:
   Build:
 
-    runs-on: windows-latest
+    runs-on: windows-2025
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 9.0.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Replace tokens
@@ -27,13 +27,10 @@ jobs:
         browser: Firefox
     - name: Build
       run: dotnet build --no-restore
-    - name: Setup Firefox
-      uses: browser-actions/setup-firefox@latest
-    - run: firefox --version
     - name: Test
       run: dotnet test --no-build --verbosity normal
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v3.1.2
+      uses: actions/upload-artifact@v4.6.2
       if: always()
       with:
         path: |
