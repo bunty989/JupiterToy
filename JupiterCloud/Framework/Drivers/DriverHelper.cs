@@ -6,9 +6,6 @@ using OpenQA.Selenium.Edge;
 using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.IE;
 using Serilog;
-using WebDriverManager;
-using WebDriverManager.DriverConfigs.Impl;
-using WebDriverManager.Helpers;
 using Browser = JupiterCloud.Framework.Wrapper.TestConstant.BrowserType;
 
 namespace JupiterCloud.Framework.Drivers
@@ -35,15 +32,6 @@ namespace JupiterCloud.Framework.Drivers
                     chromeOption.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOption.AddUserProfilePreference("profile.password_manager_enabled", false);
                     chromeOption.PageLoadStrategy = PageLoadStrategy.Eager;
-                    try
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(), _browserVersion);
-                    }
-                    catch (Exception)
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(), 
-                            VersionResolveStrategy.MatchingBrowser);
-                    }
                     Driver = new ChromeDriver(chromeOption);
                     break;
                 }
@@ -58,7 +46,6 @@ namespace JupiterCloud.Framework.Drivers
                     };
                     ieOptions.AddAdditionalInternetExplorerOption(CapabilityType.AcceptSslCertificates, true);
                     ieOptions.PageLoadStrategy = PageLoadStrategy.Eager;
-                    new DriverManager().SetUpDriver(new InternetExplorerConfig(), _browserVersion);
                     Driver = new InternetExplorerDriver(ieOptions);
                     break;
                 }
@@ -70,7 +57,6 @@ namespace JupiterCloud.Framework.Drivers
                     };
                     ffOptions.SetPreference("permissions.default.image", 2);
                     ffOptions.PageLoadStrategy = PageLoadStrategy.Eager;
-                    new DriverManager().SetUpDriver(new FirefoxConfig());
                     Driver = new FirefoxDriver(ffOptions);
                     break;
                 }
@@ -81,7 +67,6 @@ namespace JupiterCloud.Framework.Drivers
                         AcceptInsecureCertificates = true,
                         PageLoadStrategy = PageLoadStrategy.Eager
                     };
-                    new DriverManager().SetUpDriver(new EdgeConfig(), _browserVersion);
                     Driver = new EdgeDriver(edgeOptions);
                     break;
                 }
@@ -93,15 +78,6 @@ namespace JupiterCloud.Framework.Drivers
                     chromeOption.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOption.AddUserProfilePreference("profile.password_manager_enabled", false);
                     chromeOption.PageLoadStrategy = PageLoadStrategy.Eager;
-                    try
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(), _browserVersion);
-                    }
-                    catch (Exception)
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(),
-                            VersionResolveStrategy.MatchingBrowser);
-                    }
                     Driver = new ChromeDriver(chromeOption);
                     break;
                 }
@@ -114,15 +90,6 @@ namespace JupiterCloud.Framework.Drivers
                     chromeOption.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOption.AddUserProfilePreference("profile.password_manager_enabled", false);
                     chromeOption.PageLoadStrategy = PageLoadStrategy.Eager;
-                    try
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(), _browserVersion);
-                    }
-                    catch (Exception)
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(),
-                            VersionResolveStrategy.MatchingBrowser);
-                    }
                     Driver = new ChromeDriver(chromeOption);
                     break;
                 }
@@ -135,15 +102,6 @@ namespace JupiterCloud.Framework.Drivers
                     chromeOption.AddUserProfilePreference("credentials_enable_service", false);
                     chromeOption.AddUserProfilePreference("profile.password_manager_enabled", false);
                     chromeOption.PageLoadStrategy = PageLoadStrategy.Eager;
-                    try
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(), _browserVersion);
-                    }
-                    catch (Exception)
-                    {
-                        new DriverManager().SetUpDriver(new ChromeConfig(),
-                            VersionResolveStrategy.MatchingBrowser);
-                    }
                     Driver = new ChromeDriver(chromeOption);
                     break;
                 }
