@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.Extensions;
 using OpenQA.Selenium.Support.UI;
 using Serilog;
-using ExpectedConditions = SeleniumExtras.WaitHelpers.ExpectedConditions;
-using ConfigType = JupiterCloud.Framework.Wrapper.TestConstant.ConfigTypes;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using ConfigKey = JupiterCloud.Framework.Wrapper.TestConstant.ConfigTypesKey;
+using ConfigType = JupiterCloud.Framework.Wrapper.TestConstant.ConfigTypes;
 using LocatorType = JupiterCloud.Framework.Wrapper.TestConstant.LocatorType;
 using WebDriverAction = JupiterCloud.Framework.Wrapper.TestConstant.WebDriverAction;
 
@@ -32,22 +31,23 @@ namespace JupiterCloud.Framework.Wrapper
         {
             _locator = locatorType;
             _locatorInfo = locatorInfo;
-            var dWait = new WebDriverWait(Driver,
-                TimeSpan.FromSeconds(int.Parse(ConfigHelper.ReadConfigValue(ConfigType.WebDriverConfig,
-                    ConfigKey.ObjectIdentificationTimeOut))));
+            var dWait = new WebDriverWait(Driver ?? throw new ArgumentNullException(nameof(Driver)),
+                        TimeSpan.FromSeconds(int.Parse(ConfigHelper.ReadConfigValue(ConfigType.WebDriverConfig,
+                            ConfigKey.ObjectIdentificationTimeOut) ?? "0")));
             dWait.IgnoreExceptionTypes(typeof(StaleElementReferenceException),
                 typeof(NoSuchElementException),
                 typeof(ElementNotInteractableException));
             try
             {
+                var locatorText = locatorInfo ?? throw new ArgumentNullException(nameof(locatorInfo));
                 IWebElement? dynamicElement;
                 List<IWebElement?> webElements;
                 switch (locatorType)
                 {
                     case LocatorType.Id:
                         {
-                            dynamicElement = dWait.Until(ExpectedConditions.ElementToBeClickable(By.Id(locatorInfo)));
-                            webElements = new List<IWebElement?>(Driver?.FindElements(By.Id(locatorInfo)));
+                            dynamicElement = dWait.Until(Driver => ElementToBeClickable(Driver, By.Id(locatorText)));
+                            webElements = [.. Driver?.FindElements(By.Id(locatorText))];
                             if (webElements.Count > 1)
                             {
                                 foreach (var webE in webElements.Where(IsElementDisplayed))
@@ -58,21 +58,21 @@ namespace JupiterCloud.Framework.Wrapper
 
                             break;
                         }
-                        case LocatorType.ClassName:
+                    case LocatorType.ClassName:
                         {
                             dynamicElement =
-                                dWait.Until(ExpectedConditions.ElementToBeClickable(By.ClassName(locatorInfo)));
+                                dWait.Until(Driver => ElementToBeClickable(Driver, By.ClassName(locatorText)));
                             break;
                         }
-                        case LocatorType.Name:
+                    case LocatorType.Name:
                         {
-                            dynamicElement = dWait.Until(ExpectedConditions.ElementToBeClickable(By.Name(locatorInfo)));
+                            dynamicElement = dWait.Until(Driver => ElementToBeClickable(Driver, By.Name(locatorText)));
                             break;
                         }
-                        case LocatorType.XPath:
+                    case LocatorType.XPath:
                         {
-                            dynamicElement = dWait.Until(ExpectedConditions.ElementToBeClickable(By.XPath(locatorInfo)));
-                            webElements = new List<IWebElement?>(Driver?.FindElements(By.XPath(locatorInfo)));
+                            dynamicElement = dWait.Until(Driver => ElementToBeClickable(Driver, By.XPath(locatorText)));
+                            webElements = [.. Driver.FindElements(By.XPath(locatorText))];
                             if (webElements.Count > 1)
                             {
                                 foreach (var webE in webElements.Where(IsElementDisplayed))
@@ -83,42 +83,42 @@ namespace JupiterCloud.Framework.Wrapper
 
                             break;
                         }
-                        case LocatorType.CssSelector:
+                    case LocatorType.CssSelector:
                         {
                             dynamicElement =
-                                dWait.Until(ExpectedConditions.ElementToBeClickable(By.CssSelector(locatorInfo)));
+                                dWait.Until(Driver => ElementToBeClickable(Driver, By.CssSelector(locatorText)));
                             break;
                         }
-                        case LocatorType.LinkText:
+                    case LocatorType.LinkText:
                         {
                             dynamicElement =
-                                dWait.Until(ExpectedConditions.ElementToBeClickable(By.LinkText(locatorInfo)));
+                                dWait.Until(Driver => ElementToBeClickable(Driver, By.LinkText(locatorText)));
                             break;
                         }
-                        case LocatorType.PartialLinkText:
+                    case LocatorType.PartialLinkText:
                         {
                             dynamicElement =
-                                dWait.Until(ExpectedConditions.ElementToBeClickable(By.PartialLinkText(locatorInfo)));
+                                dWait.Until(Driver => ElementToBeClickable(Driver, By.PartialLinkText(locatorText)));
                             break;
                         }
-                        case LocatorType.TagName:
+                    case LocatorType.TagName:
                         {
                             dynamicElement =
-                                dWait.Until(ExpectedConditions.ElementToBeClickable(By.TagName(locatorInfo)));
+                                dWait.Until(Driver => ElementToBeClickable(Driver, By.TagName(locatorText)));
                             break;
                         }
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(locatorType), locatorType, null);
-                    }
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(locatorType), locatorType, null);
+                }
 
-                    var webElementName = dynamicElement?.GetAttribute("name");
-                    var webElementValue = dynamicElement?.GetAttribute("value");
-                    var elementDisplayedText = (string.IsNullOrEmpty(webElementValue)) ? webElementName : webElementValue;
-                    Log.Debug("WebElement {0} is identified successfully", elementDisplayedText);
+                var webElementName = dynamicElement?.GetAttribute("name");
+                var webElementValue = dynamicElement?.GetAttribute("value");
+                var elementDisplayedText = string.IsNullOrEmpty(webElementValue) ? webElementName : webElementValue;
+                Log.Debug("WebElement {0} is identified successfully", elementDisplayedText);
 
                 _webElementName = dynamicElement?.GetAttribute("name");
                 _webElementValue = dynamicElement?.GetAttribute("value");
-                _elementDisplayedText = (string.IsNullOrEmpty(_webElementValue)) ? _webElementName : _webElementValue;
+                _elementDisplayedText = string.IsNullOrEmpty(_webElementValue) ? _webElementName : _webElementValue;
                 return dynamicElement;
             }
             catch (StaleElementReferenceException ex)
@@ -145,7 +145,7 @@ namespace JupiterCloud.Framework.Wrapper
             }
         }
 
-        public void PerformWebDriverAction(IWebElement? objWebElement, WebDriverAction webDriverAction, string? actionData =null)
+        public void PerformWebDriverAction(IWebElement? objWebElement, WebDriverAction webDriverAction, string? actionData = null)
         {
             if (objWebElement == null)
             {
@@ -159,102 +159,102 @@ namespace JupiterCloud.Framework.Wrapper
                 switch (webDriverAction)
                 {
                     case WebDriverAction.Clear:
-                    {
-                        objWebElement?.Click();
-                        objWebElement?.Clear();
-                        boolExecStep = true;
-                        Log.Debug("Clearing TextBox {0}", actionData);
-                        break;
-                    }
-                    case WebDriverAction.Input:
-                    {
-                        objWebElement?.Click();
-                        objWebElement?.Clear();
-                        objWebElement?.SendKeys(actionData);
-                        boolExecStep = true;
-                        Log.Debug("Entering text {0} to TextBox {1}", actionData, _elementDisplayedText);
-                        break;
-                    }
-                    case WebDriverAction.WaitInput:
-                    {
-                        objWebElement?.Click();
-                        objWebElement?.SendKeys(Keys.Control + "a");
-                        objWebElement?.SendKeys(Keys.Delete);
-                        objWebElement?.SendKeys(actionData);
-                        boolExecStep = true;
-                        Log.Debug("Entering text {0} to TextBox {1}", actionData, _elementDisplayedText);
-                        break;
-                    }
-                    case WebDriverAction.JavaScriptInput:
-                    {
-                        var js = "document.querySelector(\"" + _locatorInfo + "\")";
-                        bool stepCompletion;
-                        do
                         {
-                            ExecuteJs(js + ".value=" + actionData);
-                            stepCompletion = ReturnHiddenWebElementsValue(js).Equals(actionData);
-                        } while (!stepCompletion);
-                        boolExecStep = true;
-                        Log.Debug("Entering text {0} to TextBox {1}", actionData, _locatorInfo);
-                        break;
-                    }
+                            objWebElement?.Click();
+                            objWebElement?.Clear();
+                            boolExecStep = true;
+                            Log.Debug("Clearing TextBox {0}", actionData);
+                            break;
+                        }
+                    case WebDriverAction.Input:
+                        {
+                            objWebElement?.Click();
+                            objWebElement?.Clear();
+                            objWebElement?.SendKeys(actionData);
+                            boolExecStep = true;
+                            Log.Debug("Entering text {0} to TextBox {1}", actionData, _elementDisplayedText);
+                            break;
+                        }
+                    case WebDriverAction.WaitInput:
+                        {
+                            objWebElement?.Click();
+                            objWebElement?.SendKeys(Keys.Control + "a");
+                            objWebElement?.SendKeys(Keys.Delete);
+                            objWebElement?.SendKeys(actionData);
+                            boolExecStep = true;
+                            Log.Debug("Entering text {0} to TextBox {1}", actionData, _elementDisplayedText);
+                            break;
+                        }
+                    case WebDriverAction.JavaScriptInput:
+                        {
+                            var js = "document.querySelector(\"" + _locatorInfo + "\")";
+                            bool stepCompletion;
+                            do
+                            {
+                                ExecuteJs(js + ".value=" + actionData);
+                                stepCompletion = ReturnHiddenWebElementsValue(js).Equals(actionData);
+                            } while (!stepCompletion);
+                            boolExecStep = true;
+                            Log.Debug("Entering text {0} to TextBox {1}", actionData, _locatorInfo);
+                            break;
+                        }
                     case WebDriverAction.Select:
-                    {
-                        objWebElement?.Click();
-                        var selector = new SelectElement(objWebElement);
-                        selector.SelectByText(actionData);
-                        boolExecStep = true;
-                        Log.Debug("Selecting option {0} from Selector {1}", actionData, _elementDisplayedText);
-                        break;
-                    }
+                        {
+                            objWebElement?.Click();
+                            var selector = new SelectElement(objWebElement);
+                            selector.SelectByText(actionData);
+                            boolExecStep = true;
+                            Log.Debug("Selecting option {0} from Selector {1}", actionData, _elementDisplayedText);
+                            break;
+                        }
                     case WebDriverAction.Click:
-                    {
-                        objWebElement?.Click();
-                        boolExecStep = true;
-                        Log.Debug("Clicking on button {0}", _elementDisplayedText);
-                        break;
-                    }
+                        {
+                            objWebElement?.Click();
+                            boolExecStep = true;
+                            Log.Debug("Clicking on button {0}", _elementDisplayedText);
+                            break;
+                        }
                     case WebDriverAction.JavaScriptClick:
-                    {
-                        var executor = Driver as IJavaScriptExecutor;
-                        executor?.ExecuteScript("arguments[0].click();", objWebElement);
-                        boolExecStep = true;
-                        Log.Debug("Clicking on button {0}", _elementDisplayedText);
-                        break;
-                    }
+                        {
+                            var executor = Driver as IJavaScriptExecutor;
+                            executor?.ExecuteScript("arguments[0].click();", objWebElement);
+                            boolExecStep = true;
+                            Log.Debug("Clicking on button {0}", _elementDisplayedText);
+                            break;
+                        }
                     case WebDriverAction.Focus:
-                    {
-                        actFocus.MoveToElement(objWebElement).Build().Perform();
-                        boolExecStep = true;
-                        Log.Debug("Focussing on button {0}", _elementDisplayedText);
-                        break;
-                    }
+                        {
+                            actFocus.MoveToElement(objWebElement).Build().Perform();
+                            boolExecStep = true;
+                            Log.Debug("Focussing on button {0}", _elementDisplayedText);
+                            break;
+                        }
                     case WebDriverAction.DoubleClick:
-                    {
-                        actFocus.MoveToElement(objWebElement).DoubleClick().Build().Perform();
-                        boolExecStep = true;
-                        Log.Debug("Double clicking on button {0}", _elementDisplayedText);
-                        break;
-                    }
+                        {
+                            actFocus.MoveToElement(objWebElement).DoubleClick().Build().Perform();
+                            boolExecStep = true;
+                            Log.Debug("Double clicking on button {0}", _elementDisplayedText);
+                            break;
+                        }
                     case WebDriverAction.ScrollToTop:
-                    {
-                        actFocus.MoveToElement(objWebElement).SendKeys(Keys.Home).Build().Perform();
-                        boolExecStep = true;
-                        Log.Debug("Double clicking on button {0}", _elementDisplayedText);
-                        break;
-                    }
+                        {
+                            actFocus.MoveToElement(objWebElement).SendKeys(Keys.Home).Build().Perform();
+                            boolExecStep = true;
+                            Log.Debug("Double clicking on button {0}", _elementDisplayedText);
+                            break;
+                        }
                     case WebDriverAction.ScrollToBottom:
-                    {
-                        actFocus.MoveToElement(objWebElement).SendKeys(Keys.End).Build().Perform();
-                        boolExecStep = true;
-                        Log.Debug("Double clicking on button {0}", _elementDisplayedText);
-                        break;
-                    }
+                        {
+                            actFocus.MoveToElement(objWebElement).SendKeys(Keys.End).Build().Perform();
+                            boolExecStep = true;
+                            Log.Debug("Double clicking on button {0}", _elementDisplayedText);
+                            break;
+                        }
                     default:
-                    {
-                        boolExecStep = false;
-                        break;
-                    }
+                        {
+                            boolExecStep = false;
+                            break;
+                        }
                 }
             }
             catch (Exception ex)
@@ -263,49 +263,49 @@ namespace JupiterCloud.Framework.Wrapper
                 switch (ex)
                 {
                     case StaleElementReferenceException:
-                    {
-                        WebElementExceptionHandler(webDriverAction, actionData);
-                        Log.Debug("Stale Element Exception for WebElement {0} Handled", _elementDisplayedText);
-                        return;
-                    }
+                        {
+                            WebElementExceptionHandler(webDriverAction, actionData);
+                            Log.Debug("Stale Element Exception for WebElement {0} Handled", _elementDisplayedText);
+                            return;
+                        }
                     case ElementClickInterceptedException:
-                    {
-                        Driver?.FindElement(By.XPath("//html")).Click();
-                        WebElementExceptionHandler(webDriverAction, actionData);
-                        Log.Debug("Element Click Intercepted Exception for WebElement {0} Handled", _elementDisplayedText);
-                        return;
-                    }
+                        {
+                            Driver?.FindElement(By.XPath("//html")).Click();
+                            WebElementExceptionHandler(webDriverAction, actionData);
+                            Log.Debug("Element Click Intercepted Exception for WebElement {0} Handled", _elementDisplayedText);
+                            return;
+                        }
                     case ElementNotInteractableException:
-                    {
-                        Driver?.FindElement(By.XPath("//html")).Click();
-                        WebElementExceptionHandler(webDriverAction, actionData);
-                        Log.Debug("Element Not Interactable Exception for WebElement {0} Handled", _elementDisplayedText);
-                        return;
-                    }
+                        {
+                            Driver?.FindElement(By.XPath("//html")).Click();
+                            WebElementExceptionHandler(webDriverAction, actionData);
+                            Log.Debug("Element Not Interactable Exception for WebElement {0} Handled", _elementDisplayedText);
+                            return;
+                        }
                     case InvalidElementStateException:
-                    {
-                        Driver?.FindElement(By.XPath("//html")).Click();
-                        WebElementExceptionHandler(webDriverAction, actionData);
-                        Log.Debug("Element Invalid State Exception for WebElement {0} Handled", _elementDisplayedText);
-                        return;
-                    }
+                        {
+                            Driver?.FindElement(By.XPath("//html")).Click();
+                            WebElementExceptionHandler(webDriverAction, actionData);
+                            Log.Debug("Element Invalid State Exception for WebElement {0} Handled", _elementDisplayedText);
+                            return;
+                        }
                     case UnhandledAlertException:
-                    {
-                        ReadAndHandleAlert();
-                        Driver?.FindElement(By.XPath("//html")).Click();
-                        WebElementExceptionHandler(webDriverAction, actionData);
-                        Log.Debug("Unhandled Alert Exception for WebElement {0} Handled", _elementDisplayedText);
-                        return;
-                    }
+                        {
+                            ReadAndHandleAlert();
+                            Driver?.FindElement(By.XPath("//html")).Click();
+                            WebElementExceptionHandler(webDriverAction, actionData);
+                            Log.Debug("Unhandled Alert Exception for WebElement {0} Handled", _elementDisplayedText);
+                            return;
+                        }
                     default:
-                    {
-                        boolExecStep = false;
-                        Log.Error("Unable to perform Action on WebElement {0} due to {1}",
-                            _elementDisplayedText,
-                            strException);
-                        Assert.Fail($"Unable to perform Action on WebElement {_elementDisplayedText} due to {strException}");
-                        break;
-                    }
+                        {
+                            boolExecStep = false;
+                            Log.Error("Unable to perform Action on WebElement {0} due to {1}",
+                                _elementDisplayedText,
+                                strException);
+                            Assert.Fail($"Unable to perform Action on WebElement {_elementDisplayedText} due to {strException}");
+                            break;
+                        }
                 }
             }
             if (!boolExecStep) { Log.Information("No Action was performed"); }
@@ -323,7 +323,7 @@ namespace JupiterCloud.Framework.Wrapper
                 LocatorType.LinkText => new List<IWebElement?>(Driver?.FindElements(By.LinkText(locatorInfo))),
                 LocatorType.PartialLinkText => new List<IWebElement?>(Driver?.FindElements(By.PartialLinkText(locatorInfo))),
                 LocatorType.TagName => new List<IWebElement?>(Driver?.FindElements(By.TagName(locatorInfo))),
-                _ => new List<IWebElement?>(Driver?.FindElements(By.XPath(locatorInfo)))
+                _ => [.. Driver?.FindElements(By.XPath(locatorInfo))]
             };
             return webElements;
         }
@@ -333,11 +333,11 @@ namespace JupiterCloud.Framework.Wrapper
             try
             {
                 var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
-                wait.Until(ExpectedConditions.AlertIsPresent());
+                wait.Until(AlertIsPresent);
                 var alert = Driver?.SwitchTo().Alert();
                 var strWarning = alert?.Text;
                 alert?.Accept();
-                wait.Until(ExpectedConditions.AlertState(false));
+                wait.Until(AlertIsNotPresent);
                 Log.Debug("Alert displayed as {0}", strWarning);
                 return strWarning;
             }
@@ -391,7 +391,7 @@ namespace JupiterCloud.Framework.Wrapper
             {
                 attributeValue = InitialiseDynamicWebElement(_locator, _locatorInfo)?.GetAttribute(cssAttribute);
             }
-            Log.Debug("The attribute {0} for the webElement is {1}", cssAttribute,attributeValue);
+            Log.Debug("The attribute {0} for the webElement is {1}", cssAttribute, attributeValue);
             return attributeValue;
         }
 
@@ -401,7 +401,7 @@ namespace JupiterCloud.Framework.Wrapper
             {
                 new WebDriverWait(Driver, TimeSpan.FromSeconds(int.Parse(ConfigHelper.ReadConfigValue
                     (ConfigType.WebDriverConfig, ConfigKey.ObjectIdentificationTimeOut)))).Until(
-                    d => ((IJavaScriptExecutor) d).ExecuteScript("return document.readyState").Equals("complete"));
+                    d => ((IJavaScriptExecutor)d).ExecuteScript("return document.readyState").Equals("complete"));
             }
             catch (UnhandledAlertException)
             {
@@ -410,7 +410,7 @@ namespace JupiterCloud.Framework.Wrapper
             }
             catch (Exception ex)
             {
-                Log.Error("Unable to get Page Ready state due to {0}",ex.Message);
+                Log.Error("Unable to get Page Ready state due to {0}", ex.Message);
             }
         }
 
@@ -433,7 +433,12 @@ namespace JupiterCloud.Framework.Wrapper
 
         public void ExecuteJs(string javaScript, params object[] args)
         {
-            Driver.ExecuteJavaScript(javaScript, args);
+            Driver?.ExecuteJavaScript(javaScript, args);
+        }
+
+        public void PageRefresh()
+        {
+            Driver?.Navigate().Refresh();
         }
 
         public string? GetWindowTitle()
@@ -467,7 +472,7 @@ namespace JupiterCloud.Framework.Wrapper
         {
             try
             {
-                var hiddenWebElementsValue = Driver.ExecuteJavaScript<string>("return " + identifierJScript + ".value");
+                var hiddenWebElementsValue = Driver?.ExecuteJavaScript<string>("return " + identifierJScript + ".value");
                 Log.Debug("The Value of the WebElement {0} on screen is displayed as {1}",
                     identifierJScript,
                     hiddenWebElementsValue);
@@ -481,7 +486,73 @@ namespace JupiterCloud.Framework.Wrapper
             }
         }
 
-        private void WebElementExceptionHandler(WebDriverAction webDriverAction, string? strData=null)
+        public Boolean IsChecked(IWebElement? chkBoxElement)
+        {
+            try
+            {
+                var isChecked = chkBoxElement != null && chkBoxElement.Selected;
+                Log.Debug("The WebElement {0} is {1}",
+                    chkBoxElement?.GetAttribute("value"),
+                    isChecked.ToString());
+                return isChecked;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("The WebElement is not loaded correctly due to : \n {0}", ex.Message);
+                return false;
+            }
+        }
+
+        public string? GetDriverType()
+        {
+            if (Driver == null) return null;
+
+            try
+            {
+                switch (Driver)
+                {
+                    case OpenQA.Selenium.Chrome.ChromeDriver:
+                        return "Chrome";
+                    case OpenQA.Selenium.Firefox.FirefoxDriver:
+                        return "Firefox";
+                    case OpenQA.Selenium.Edge.EdgeDriver:
+                        return "Edge";
+                    case OpenQA.Selenium.Safari.SafariDriver:
+                        return "Safari";
+                    case OpenQA.Selenium.IE.InternetExplorerDriver:
+                        return "InternetExplorer";
+                    case OpenQA.Selenium.Remote.RemoteWebDriver remote:
+                        {
+                            var cap = remote.Capabilities?.GetCapability("browserName")?.ToString();
+                            return string.IsNullOrEmpty(cap) ? remote.GetType().Name : cap;
+                        }
+                    default:
+                        return Driver.GetType().Name;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unable to determine Driver type due to {0}", ex.Message);
+                return Driver.GetType().Name;
+            }
+        }
+
+        public string? GetPageSource()
+        {
+            try
+            {
+                var pageSource = Driver?.PageSource;
+                Log.Debug("The Page Source is fetched successfully: {0}", pageSource);
+                return pageSource;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Unable to get Page Source due to {0}", ex.Message);
+                return null;
+            }
+        }
+
+        private void WebElementExceptionHandler(WebDriverAction webDriverAction, string? strData = null)
         {
             var objWebElement = InitialiseDynamicWebElement(_locator, _locatorInfo);
             PerformWebDriverAction(objWebElement, webDriverAction, strData);
@@ -490,6 +561,37 @@ namespace JupiterCloud.Framework.Wrapper
         private IWebElement? ReIdentifyAndInitialiseDynamicWebElement()
         {
             return InitialiseDynamicWebElement(_locator, _locatorInfo);
+        }
+
+        private static IWebElement? ElementToBeClickable(IWebDriver driver, By locator)
+        {
+            var element = driver.FindElement(locator);
+            return element.Displayed && element.Enabled ? element : null;
+        }
+
+        private static IAlert? AlertIsPresent(IWebDriver driver)
+        {
+            try
+            {
+                return driver.SwitchTo().Alert();
+            }
+            catch (NoAlertPresentException)
+            {
+                return null;
+            }
+        }
+
+        private static bool AlertIsNotPresent(IWebDriver driver)
+        {
+            try
+            {
+                driver.SwitchTo().Alert();
+                return false;
+            }
+            catch (NoAlertPresentException)
+            {
+                return true;
+            }
         }
     }
 }
